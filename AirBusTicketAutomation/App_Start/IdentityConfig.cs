@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
@@ -16,10 +17,19 @@ namespace AirBusTicketAutomation
 {
     public class EmailService : IIdentityMessageService
     {
-        public Task SendAsync(IdentityMessage message)
+        public async Task SendAsync(IdentityMessage message)
         {
             // Plug in your email service here to send an email.
-            return Task.FromResult(0);
+            MailMessage email = new MailMessage(new MailAddress("jamdmasud@diu.edu.bd", "(Do not reply)"),
+                new MailAddress(message.Destination));
+            email.Subject = message.Subject;
+            email.Body = message.Body;
+            email.IsBodyHtml = true;
+            using (var mailClient = new AirBusTicketAutomation.EmailGateway())
+            {
+                //email.From = new MailAddress(mailClient.UserName, "don't reply");
+                await mailClient.SendMailAsync(email);
+            }
         }
     }
 
