@@ -151,8 +151,8 @@ namespace AirBusTicketAutomation.Controllers
         {
             if (ModelState.IsValid)
             {
-                string[] username = model.Email.Split('@');
-                var user = new ApplicationUser { UserName = username[0], Email = model.Email };
+                //string[] username = model.Email.Split('@');
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
@@ -164,11 +164,7 @@ namespace AirBusTicketAutomation.Controllers
                     var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
                     await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
 
-                    // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
-                    //string code = manager.GenerateEmailConfirmationToken(user.Id);
-                    //string callbackUrl = IdentityHelper.GetUserConfirmationRedirectUrl(code, user.Id, Request);
-                    //await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>.");
-
+                   
 
                     if (user.EmailConfirmed)
                     {
@@ -229,13 +225,13 @@ namespace AirBusTicketAutomation.Controllers
                 return View("ForgotPasswordConfirmation");
             }
 
-            // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
-            // Send an email with this link
-            // string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
-            // var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);		
-            // await UserManager.SendEmailAsync(user.Id, "Reset Password", "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>");
-            // return RedirectToAction("ForgotPasswordConfirmation", "Account");
-        }
+                // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
+                // Send an email with this link
+                string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
+                var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+                await UserManager.SendEmailAsync(user.Id, "Reset Password", "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>");
+                return RedirectToAction("ForgotPasswordConfirmation", "Account");
+            }
 
         // If we got this far, something failed, redisplay form
         return View(model);

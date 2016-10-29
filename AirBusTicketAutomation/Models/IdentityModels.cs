@@ -21,7 +21,7 @@ namespace AirBusTicketAutomation.Models
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext()
-            : base("DefaultConnection", throwIfV1Schema: false)
+            : base("AirBusDbContext", throwIfV1Schema: false)
         {
         }
 
