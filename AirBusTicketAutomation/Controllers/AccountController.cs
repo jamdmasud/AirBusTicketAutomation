@@ -70,9 +70,20 @@ namespace AirBusTicketAutomation.Controllers
         {
             if (!ModelState.IsValid)
             {
+                ModelState.AddModelError("", "Invalid login attempt.");
                 return View(model);
             }
-
+            var user = await UserManager.FindByNameAsync(model.Email);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "Invalid login attempt.");
+                return View(model);
+            }
+            if (!await UserManager.IsEmailConfirmedAsync(user.Id))
+            {
+                ModelState.AddModelError("", "Your eamil is not varified. Please varify it and sign in.");
+                return View(model);
+            }
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, change to shouldLockout: true
             var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
@@ -164,9 +175,9 @@ namespace AirBusTicketAutomation.Controllers
                     var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
                     await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
 
-                   
-
-                    if (user.EmailConfirmed)
+                    var users = await UserManager.FindByNameAsync(model.Email);
+                    
+                    if (await UserManager.IsEmailConfirmedAsync(users.Id))
                     {
                         await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                         return RedirectToAction("Index", "Home");
